@@ -1,0 +1,133 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{shorttoc}
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+
+\graphicspath{{./../}}
+
+\definecolor{linkcolor}{HTML}{000000}
+\definecolor{urlcolor}{HTML}{0085FF}
+\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+\renewcommand*\contentsname{Содержание}
+
+\newcommand{\plot}[3]{
+    \label{#3}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[scale=0.6]{./doc/img/#1.png}
+            \caption{#2}
+        \end{center}
+    \end{figure}
+}
+
+\begin{document}
+    \include{title}
+    \newpage
+
+    \tableofcontents
+    \listoffigures
+    \newpage
+
+    \section{Постановка задачи}
+    \quad Нужно реализовать протокол маршрутизации OSPF (Open Shortest Path First).
+    И проверить его работоспособность на следующих видах топологий сети:
+    линейная, кольцевидная и звёздная.
+
+    \section{Теория}
+    OSPF (Open Shortest Path First) — протокол динамической маршрутизации,
+    основанный на технологии отслеживания состояния канала
+    и использующий для нахождения кратчайшего пути алгоритм Дейкстры.
+
+    Описание работы протокола.
+    \begin{itemize}
+        \item После включения маршрутизаторов протокол ищет непосредственно подключенных соседей
+        и устанавливает с ними «дружеские» отношения.
+        \item Затем они обмениваются друг с другом информацией о подключенных и доступных им сетях.
+        То есть они строят карту сети (топологию сети).
+        Данная карта одинакова на всех маршрутизаторах.
+        \item На основе полученной информации запускается алгоритм SPF (Shortest Path First),
+        который рассчитывает оптимальный маршрут к каждой сети.
+        Данный процесс похож на построение дерева, корнем которого является сам маршрутизатор,
+        а ветвями — пути к доступным сетям.
+    \end{itemize}
+
+    \section{Результаты}
+    Сначала посмотрим на работу протокола на сети с линейной топологией.
+    Узлы сети имеют следующее расположение.
+    \plot{full_line_points}{Расположение узлов сети с линейной топологией}{p:fullLinePoints}
+
+    Построим граф сети, указав радиус соединения равным $ r = 1.5 $.
+    \plot{full_line}{Граф сети с линейной топологией}{p:fullLine}
+
+    Найдём кратчайшие пути между всеми парами узлов сети.
+    Приведём некоторые примеры (полные результаты в файле \textsl{lab2/results/line\_full.txt}).
+    
+    \lstinputlisting[]{../results/line_full.txt}
+
+    Теперь уберём из сети узел $ 3 $ (перенеся его достаточно далеко)
+    и перестроим граф сети.
+    \plot{rm_line}{Граф сети с линейной топологией без $ 3 $ узла}{p:rmLine}
+
+    Приведём кратчайшие пути для тех же пар узлов (полные результаты в файле \textsl{lab2/results/line\_remove.txt}).
+    
+    \lstinputlisting[]{../results/line_remove.txt}
+
+    Проведём аналогичную процедуру для сети с кольцевидной топологией.
+    \plot{full_ring_points}{Расположение узлов сети с кольцевидной топологией}{p:fullRingPoints}
+
+    Граф, построенный с радиусом соединения $ r = 1.7 $, сети имеет вид.
+    \plot{full_ring}{Граф сети с кольцевидной топологией}{p:fullRing}
+
+    Примеры кратчайших путей (подробнее \textsl{lab2/results/ring\_full.txt})
+
+    \lstinputlisting[]{../results/ring_full.txt}
+
+    После удаления узла $ 11 $ граф сети имеет вид.
+    \plot{rm_ring}{Граф сети с кольцевидной топологией без $ 11 $ узла}{p:rmRing}
+
+    Примеры путей для тех же пар узлов (подробнее \textsl{lab2/results/ring\_remove.txt})
+    
+    \lstinputlisting[]{../results/ring_remove.txt}
+
+    Узлы сети со звёздной топологией и центральным узлом $ 0 $ имеют следующее расположение.
+    \plot{full_star_points}{Расположение узлов сети с звёздной топологией}{p:fullStarPoints}
+
+    Граф для данной сети имеет вид.
+    \plot{full_star}{Граф сети с звёздной топологией}{p:fullStar}
+
+    Некоторые примеры кратчайший путей (подробнее \textsl{lab2/results/star\_full.txt}).
+    
+    \lstinputlisting[]{../results/star_full.txt}
+
+    После удаления центрального узла $ 0 $ граф сети имеет вид.
+    \plot{rm_star}{Граф сети с звёздной топологией без центрального узла $ 0 $}{p:rmStar}
+
+    Путей для тех же пар узлов (подробнее \textsl{lab2/results/star\_remove.txt})
+    не будет существовать.
+
+    \lstinputlisting[]{../results/star_remove.txt}
+
+    \section{Обсуждение}
+    Из полученных результатов можно заметить следующее.
+    Сеть с линейной топологией наиболее чувствительна к потерям
+    узлов сети, потеря одного узла ведёт к появлению недостижимых узлов.
+    Сеть с кольцевидной топологией менее чувствительна к потерям узлов,
+    при потере одного узла она переходит в сеть с линейной топологией.
+    Сеть со звёздной топологией наименее чувствительна к потере узлов до тех пор,
+    пока это не центральный узел.
+    В случае потери центрального узла любая пара других узлов становится недостижима. 
+
+\end{document}
